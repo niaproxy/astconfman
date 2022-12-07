@@ -1027,6 +1027,45 @@ client.add_event_listener(
     TalkingStatus='off',
 )
 
+def mute(self, conf_id, channel=None):
+	conf = Conference.query.get_or_404(conf_id)
+	if channel:
+		play_dtmf_via_ami(channel)
+		msg = gettext('Participant %(channel)s muted.', channel=channel)
+		flash(msg)
+		conf.log(msg)
+	else:
+		# Mute all
+		for p in confbridge_list_participants(conf.number):
+			if not "m" in p['flags']:
+				play_dtmf_via_ami(p['channel'])
+		msg = gettext('Conference muted.')
+		flash(msg)
+		conf.log(msg)
+	sse_notify(conf.id, 'update_participants')
+	time.sleep(1)
+	return redirect(url_for('.details_view', id=conf_id))
+
+
+def unmute(self, conf_id, channel=None):
+	conf = Conference.query.get_or_404(conf_id)
+	if channel:
+		play_dtmf_via_ami(channel)
+		msg = gettext('Participant %(channel)s unmuted.', channel=channel)
+		flash(msg)
+		conf.log(msg)
+	else:
+		# Mute all
+		for p in confbridge_list_participants(conf.number):
+			if "m" in p['flags']:
+				play_dtmf_via_ami(p['channel'])
+		msg = gettext('Conference unmuted.')
+		flash(msg)
+		conf.log(msg)
+	sse_notify(conf.id, 'update_participants')
+	time.sleep(1)
+	return redirect(url_for('.details_view', id=conf_id))
+
 @asterisk.route('/online_participants.json/<int:conf_number>')
 def online_participants_json(conf_number):
     ret = []
