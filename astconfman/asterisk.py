@@ -5,8 +5,29 @@ import tempfile
 from flask_babelex import gettext
 from transliterate import translit
 from app import app
+from asterisk2.ami import AMIClient
+from asterisk2.ami import SimpleAction
 
 config = app.config
+
+def play_dtmf_via_ami(chann):
+    client = AMIClient(address='127.0.0.1',port=5038)
+    for dig in app.config['MUTE_DTMF']:
+        client.login(username=app.config['AMI_USER'],secret=app.config['AMI_PASSWORD'])
+        action = SimpleAction(
+            'PlayDTMF',
+            Channel = chann,
+            Digit = dig,
+            Receive = dig
+        )
+        try:
+            client.send_action(action)
+            resp = 'success'
+        except:
+            resp = 'something wrong '+Exception
+        finally:
+            client.logoff()
+    return resp
 
 
 def _cli_command(cmd):
