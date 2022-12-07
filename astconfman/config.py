@@ -61,6 +61,8 @@ ASTERISK_SSH_KEY = 'ssh-rsa AAAAB3NzaC1yc2EA...' # Put your key in instance conf
 # You can remove any tab by adding it here.
 DISABLED_TABS = []
 
+MUTE_DTMF='1'
+
 # Callout template.
 CALLOUT_TEMPLATE = """Channel: Local/%(number)s@confman-dialout
 Context: confman-bridge
